@@ -62,7 +62,6 @@ public class WizardController : MonoBehaviour
             isGrounded = false;
         }
         anim.SetBool("isJump",!isGrounded);
-        Debug.Log(isGrounded);
     }
 
     private void OnCollisionEnter2D(Collision2D collision) {
