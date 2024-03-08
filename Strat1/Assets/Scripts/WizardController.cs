@@ -10,20 +10,15 @@ public class WizardController : MonoBehaviour
     private Rigidbody2D rigid;
     public int jumpPower = 30;
     private bool isGrounded = true;
-    public bool isGround
-    {
-        get{
-            return isGrounded;
-        }
-        set{
-            isGround = value;
-        }
-    }
-
+    public Animator anim = null;
+    public Vector3 standard_direction = new Vector3(1,1,1);
+    public Vector3 reflect_direction = new Vector3(-1,1,1);
+    
     // Start is called before the first frame update
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -33,10 +28,31 @@ public class WizardController : MonoBehaviour
         if(Input.GetKey(KeyCode.LeftArrow))
         {
             this.transform.Translate(-wizardSpeed*Time.deltaTime,0,0);
+            this.transform.localScale = reflect_direction;
+            anim.SetBool("isRun", true);
+            if(!isGrounded)
+            {
+                anim.SetBool("isRun", false);
+            }
+        }
+         else if(Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            anim.SetBool("isRun",false);
         }
         else if(Input.GetKey(KeyCode.RightArrow))
         {
             this.transform.Translate(wizardSpeed*Time.deltaTime,0,0);
+            this.transform.localScale = standard_direction;
+            anim.SetBool("isRun", true);
+            if(!isGrounded)
+            {
+                anim.SetBool("isRun", false);
+            }
+            
+        }
+        else if(Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            anim.SetBool("isRun",false);
         }
 
         //jump
@@ -45,6 +61,8 @@ public class WizardController : MonoBehaviour
             rigid.AddForce(Vector2.up*jumpPower,ForceMode2D.Impulse);
             isGrounded = false;
         }
+        anim.SetBool("isJump",!isGrounded);
+        Debug.Log(isGrounded);
     }
 
     private void OnCollisionEnter2D(Collision2D collision) {
