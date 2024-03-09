@@ -80,7 +80,7 @@ public class WizardController : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision) {
-        if(collision.gameObject.CompareTag("material"))
+        if(collision.gameObject.CompareTag("material")||collision.gameObject.CompareTag("monster"))
         {
             isGrounded = true;
         }
@@ -97,5 +97,4 @@ public class WizardController : MonoBehaviour
                 rigid.position = new Vector2(rigid.position.x+4,rigid.position.y);
         }
     }
-
 }
