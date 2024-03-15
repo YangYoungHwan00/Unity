@@ -11,25 +11,48 @@ public class WizardController : MonoBehaviour
     private bool isGrounded = true;
     public float jumpPower = 100f;
     public Animator anim = null;
-    public Vector3 standard_direction = new Vector3(1,1,1);
-    public Vector3 reflect_direction = new Vector3(-1,1,1);
-    
+    public Vector2 standard_direction = new Vector2(1,1);
+    public Vector2 reflect_direction = new Vector2(-1,1);
+    public Vector2 a = new Vector2(0,2);
+    public float cooldu = 3f;
+    public float lastused;
+    public Skill equippedSkill;
+
+    public enum Skill
+    {
+        Teleportation,
+        Attack,
+        HighJump
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
         rigid.gravityScale *= 6;
         anim = GetComponent<Animator>();
+        lastused = -cooldu;
+        equippedSkill = Skill.HighJump;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //move
+
+        // if(!isGrounded)
+        // {
+        //     anim.SetBool("isJump",true);
+        // }
+        
+        //Attack
+        if(Input.GetKeyDown(KeyCode.D))
+        {
+            StartCoroutine(attack());
+        }
         if(Input.GetKey(KeyCode.LeftArrow))
         {
-            this.transform.Translate(-wizardSpeed*Time.deltaTime,0,0);
-            this.transform.localScale = reflect_direction;
+            transform.Translate(-wizardSpeed*Time.deltaTime,0,0);
+            transform.localScale = reflect_direction;
             anim.SetBool("isRun", true);
             if(!isGrounded)
             {
@@ -43,8 +66,8 @@ public class WizardController : MonoBehaviour
         }
         else if(Input.GetKey(KeyCode.RightArrow))
         {
-            this.transform.Translate(wizardSpeed*Time.deltaTime,0,0);
-            this.transform.localScale = standard_direction;
+            transform.Translate(wizardSpeed*Time.deltaTime,0,0);
+            transform.localScale = standard_direction;
             anim.SetBool("isRun", true);
             if(!isGrounded)
             {
@@ -65,19 +88,22 @@ public class WizardController : MonoBehaviour
         }
         anim.SetBool("isJump",!isGrounded);
 
+        //special skill
         if(Input.GetKeyDown(KeyCode.T))
         {
-            if(Input.GetKey(KeyCode.UpArrow))
-            {
-                transpotaion(true);
-            }
-            else{
-                transpotaion(false);
-            }
-            
+            SkillSelector(equippedSkill);
+        }
+        
+        else if(Input.GetKeyDown(KeyCode.R))
+        {
+            powerPush();
         }
 
     }
+
+
+    /////////////////////////****************************************************************function
+
 
     private void OnCollisionEnter2D(Collision2D collision) {
         if(collision.gameObject.CompareTag("material")||collision.gameObject.CompareTag("monster"))
@@ -86,15 +112,63 @@ public class WizardController : MonoBehaviour
         }
     }
 
-    void transpotaion(bool isUp){
-        if(isUp){
-            rigid.position = new Vector2(rigid.position.x,rigid.position.y+7);
+    void Teleportation(){
+        if(Input.GetKey(KeyCode.UpArrow)){
+            transform.position = new Vector3(transform.position.x,transform.position.y+5);
         }
         else{
-            if(this.transform.localScale.x<0)
-                rigid.position = new Vector2(rigid.position.x-4,rigid.position.y);
+            if(transform.localScale.x<0)
+                transform.position = new Vector3(transform.position.x-6,transform.position.y);
             else
-                rigid.position = new Vector2(rigid.position.x+4,rigid.position.y);
+                transform.position = new Vector3(transform.position.x+6,transform.position.y);
         }
+    }
+
+    void HighJump()
+    {
+        rigid.AddForce(Vector2.up*30f,ForceMode2D.Impulse);
+        isGrounded = false;
+    }
+
+    void powerPush()
+    {
+        float maxdis = 3f;
+        if(Physics2D.Raycast(transform.position,Vector2.right,maxdis))
+        {
+            Debug.Log("true");
+        }
+    }
+
+    void SkillSelector(Skill skill)
+    {
+        switch (skill)
+        {
+            case Skill.HighJump:
+                HighJump();
+                break;
+
+            case Skill.Attack:
+                Debug.Log("f");
+                break;
+            
+            case Skill.Teleportation:
+                Teleportation();
+                break;
+        }
+    }
+
+    IEnumerator attack()
+    {
+        Collider2D[] cc = Physics2D.OverlapCircleAll(transform.position,4f);
+        
+            anim.SetBool("attack",true);
+            yield return new WaitForSeconds(0.3f);
+            foreach(Collider2D a in cc)
+            {
+                if(a.CompareTag("monster"))
+                {       
+                    Debug.Log("hit");
+                }
+            }
     }
 }
