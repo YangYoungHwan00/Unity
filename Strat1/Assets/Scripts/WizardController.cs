@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,15 +16,23 @@ public class WizardController : MonoBehaviour
     public Vector2 standard_direction = new Vector2(1,1);
     public Vector2 reflect_direction = new Vector2(-1,1);
     public Vector2 a = new Vector2(0,2);
-    public float cooldu = 3f;
-    public float lastused;
     public Skill equippedSkill;
+    public float defense;
 
     public enum Skill
     {
         Teleportation,
         Attack,
-        HighJump
+        HighJump,
+        PowerPush,
+        SpeedUp,
+        DefenseUp,
+        RubberMan,
+        Magnet,
+        Giant,
+        NanJangI,
+        FireBall,
+        RailGun
     }
 
     // Start is called before the first frame update
@@ -31,19 +41,14 @@ public class WizardController : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         rigid.gravityScale *= 6;
         anim = GetComponent<Animator>();
-        lastused = -cooldu;
-        equippedSkill = Skill.HighJump;
+        equippedSkill = Skill.SpeedUp;
     }
 
     // Update is called once per frame
     void Update()
     {
+        transform.rotation = Quaternion.identity;
 
-        // if(!isGrounded)
-        // {
-        //     anim.SetBool("isJump",true);
-        // }
-        
         //Attack
         if(Input.GetKeyDown(KeyCode.D))
         {
@@ -83,7 +88,7 @@ public class WizardController : MonoBehaviour
         //jump
         if(Input.GetKeyDown(KeyCode.Space)&&isGrounded)
         {
-            rigid.AddForce(Vector2.up*jumpPower * 1.2f, ForceMode2D.Impulse);
+            rigid.AddForce(Vector2.up*jumpPower * 1.5f, ForceMode2D.Impulse);
             isGrounded = false;
         }
         anim.SetBool("isJump",!isGrounded);
@@ -93,12 +98,6 @@ public class WizardController : MonoBehaviour
         {
             SkillSelector(equippedSkill);
         }
-        
-        else if(Input.GetKeyDown(KeyCode.R))
-        {
-            powerPush();
-        }
-
     }
 
 
@@ -110,6 +109,7 @@ public class WizardController : MonoBehaviour
         {
             isGrounded = true;
         }
+
     }
 
     void Teleportation(){
@@ -126,16 +126,23 @@ public class WizardController : MonoBehaviour
 
     void HighJump()
     {
-        rigid.AddForce(Vector2.up*30f,ForceMode2D.Impulse);
+        rigid.AddForce(Vector2.up*jumpPower*3f,ForceMode2D.Impulse);
         isGrounded = false;
     }
 
-    void powerPush()
+    void PowerPush()
     {
-        float maxdis = 3f;
-        if(Physics2D.Raycast(transform.position,Vector2.right,maxdis))
+        Collider2D[] enemy = Physics2D.OverlapCircleAll(transform.position,6f);
+        foreach(Collider2D e in enemy)
         {
-            Debug.Log("true");
+            if(e.CompareTag("monster"))
+            {
+                Rigidbody2D rb = e.attachedRigidbody;
+                Vector2 forceDirection = transform.localScale;
+                rb.AddForce(forceDirection*10f,ForceMode2D.Impulse);
+            }
+
+            
         }
     }
 
@@ -154,21 +161,86 @@ public class WizardController : MonoBehaviour
             case Skill.Teleportation:
                 Teleportation();
                 break;
+
+            case Skill.PowerPush:
+                PowerPush();
+                break;
+
+            case Skill.SpeedUp:
+                SpeedUp();
+                break;
+            
+            case Skill.DefenseUp:
+                DefenseUp();
+                break;
+            
+            case Skill.RubberMan:
+                RubberMan();
+                break;
         }
     }
 
+    void SpeedUp()
+    {
+        wizardSpeed = 20f;
+        StartCoroutine(DeactivateSpeedUp());
+    }
+
+    void DefenseUp()
+    {
+        defense += 1000;
+        StartCoroutine(DeactivateDefenseUp());
+    }
+
+    void RubberMan()
+    {
+        while(isGrounded)
+        {
+            rigid.AddForce(Vector2.up,ForceMode2D.Impulse);
+        }
+        StartCoroutine(DeactivateRubberMan());
+    }
+
+    //attack
     IEnumerator attack()
     {
-        Collider2D[] cc = Physics2D.OverlapCircleAll(transform.position,4f);
+        Collider2D[] enemy = Physics2D.OverlapCircleAll(transform.position,4f);
         
             anim.SetBool("attack",true);
             yield return new WaitForSeconds(0.3f);
-            foreach(Collider2D a in cc)
+            foreach(Collider2D e in enemy)
             {
-                if(a.CompareTag("monster"))
-                {       
+                if(e.CompareTag("monster"))
+                {
                     Debug.Log("hit");
                 }
             }
+    }
+
+    IEnumerator DeactivateSpeedUp()
+    {
+        yield return new WaitForSeconds(7f);
+        wizardSpeed = 10f;
+        yield return new WaitForSeconds(3f);
+        Debug.Log("aa");
+    }
+
+    IEnumerator DeactivateDefenseUp()
+    {
+        yield return new WaitForSeconds(7f);
+        defense -= 1000;
+    }
+
+    IEnumerator DeactivateRubberMan()
+    {
+        yield return new WaitForSeconds(7f);
+    }
+
+    void Damage()
+    {
+        float x = 3000;
+        float damaged;
+        float attk = 10000;
+        damaged = attk * defense / (defense + x);
     }
 }

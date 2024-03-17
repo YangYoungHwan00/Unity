@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Badak
   - material
+  - monster
+  - item
+  - ladder
   layers:
   - Default
   - TransparentFX
