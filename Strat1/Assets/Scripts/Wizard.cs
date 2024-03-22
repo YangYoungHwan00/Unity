@@ -18,6 +18,9 @@ public class Wizard : MonoBehaviour
     public Collider2D playerCollider;
     public bool isGrounded;
     public bool onLadder = false;
+    public bool canLadder = false;
+    public Vector2 ladderTop;
+    public Vector2 ladderBottom;
     public float jumpPower = 10f;
     public int hp;
     public int stamina;
@@ -74,13 +77,29 @@ public class Wizard : MonoBehaviour
         }
 
         //jump
-        if(Input.GetKeyDown(KeyCode.Space)&&isGrounded)
+        if(isGrounded&&Input.GetKeyDown(KeyCode.Space))
         {
             rigid.AddForce(Vector2.up*jumpPower * 1.0f, ForceMode2D.Impulse);
-            isGrounded = false;
+            // isGrounded = false;
         }
         anim.SetBool("isJump",!isGrounded);
 
+        if(canLadder&&(Input.GetKey(KeyCode.UpArrow))&&transform.position.y<ladderTop.y)
+        {
+            onLadder = true;
+        }
+        if(canLadder&&(Input.GetKey(KeyCode.DownArrow))&&transform.position.y>ladderBottom.y)
+        {
+            onLadder = true;
+        }
+        if(onLadder&&Input.GetKeyDown(KeyCode.Space))
+        {
+            onLadder = false;
+            rigid.gravityScale = 10;
+            rigid.isKinematic = false;
+            rigid.AddForce(Vector2.up*10,ForceMode2D.Impulse);
+        }
+        
         if(!isGrounded)
         {
             if(rigid.velocity.y>0)
@@ -96,7 +115,7 @@ public class Wizard : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(Input.GetKey(KeyCode.LeftArrow))
+        if(Input.GetKey(KeyCode.LeftArrow)&&!onLadder)
         {
             transform.Translate(-speed*Time.deltaTime,0,0);
             transform.localScale = reflect_direction;
@@ -107,7 +126,7 @@ public class Wizard : MonoBehaviour
             }
             
         }
-        else if(Input.GetKey(KeyCode.RightArrow))
+        else if(Input.GetKey(KeyCode.RightArrow)&&!onLadder)
         {
             transform.Translate(speed*Time.deltaTime,0,0);
             transform.localScale = standard_direction;
@@ -120,10 +139,21 @@ public class Wizard : MonoBehaviour
 
         if(onLadder)
         {
+            rigid.gravityScale = 0;
+            rigid.isKinematic = true;
             if(Input.GetKey(KeyCode.UpArrow))
+            {
+                rigid.velocity = new Vector2(0,4f);
                 upLadder();
+            }
+                
             if(Input.GetKey(KeyCode.DownArrow))
+            {
+                rigid.velocity = new Vector2(0,-4f);
                 downLadder();
+            }
+
+            rigid.velocity = new Vector2(0,0);
         }
         
     }
@@ -132,10 +162,20 @@ public class Wizard : MonoBehaviour
 
 
     private void OnCollisionEnter2D(Collision2D collision) {
-        if(collision.gameObject.CompareTag("material")||collision.gameObject.CompareTag("monster"))
+        if(collision.gameObject.CompareTag("Badak"))
         {
             isGrounded = true;
         }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision) {
+        if(collision.gameObject.CompareTag("Badak"))
+            isGrounded = true;
+    }
+
+    private void OnCollisionExit2D(Collision2D collision){
+        if(collision.gameObject.CompareTag("Badak"))
+            isGrounded = false;
     }
 
     void Teleportation(){
@@ -169,6 +209,11 @@ public class Wizard : MonoBehaviour
             }
 
         }
+    }
+
+    void Giant()
+    {
+        transform.localScale *= 2;
     }
 
     protected void SkillSelector(Skill skill)
@@ -282,20 +327,39 @@ public class Wizard : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other) {
         if(other.CompareTag("ladder"))
         {
-            onLadder = true;
-            rigid.gravityScale = 0;
-            rigid.isKinematic = true;
+            canLadder = true;
+            ladderTop = new Vector2(other.transform.position.x,other.transform.position.y+other.transform.localScale.y);
+            ladderBottom = new Vector2(other.transform.position.x,other.transform.position.y-other.transform.localScale.y/2+transform.localScale.y);
+        }
+            
+    }
+
+    private void OnTriggerStay2D(Collider2D other){
+        if(onLadder)
+        {
+            transform.position = new Vector2(other.transform.position.x,transform.position.y);
+            if(transform.position.y>other.transform.position.y+other.transform.localScale.y)
+            {
+                onLadder = false;
+                rigid.gravityScale = 10;
+                rigid.isKinematic = false;
+            }
+            else if(transform.position.y<other.transform.position.y-other.transform.localScale.y/2+transform.localScale.y)
+            {
+                onLadder = false;
+                rigid.gravityScale = 10;
+                rigid.isKinematic = false;
+            }
         }
     }
 
     private void OnTriggerExit2D(Collider2D other){
         if(other.CompareTag("ladder"))
         {
+            canLadder = false;
             onLadder = false;
             rigid.gravityScale = 10;
             rigid.isKinematic = false;
-            Debug.Log("exit");
         }
     }
-    
 }
