@@ -17,6 +17,6 @@ public class MainCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        this.transform.localPosition = new Vector3(character.position.x,character.position.y,character.position.z-20);
+        transform.localPosition = new Vector3(character.position.x,character.position.y,character.position.z-20);
     }
 }

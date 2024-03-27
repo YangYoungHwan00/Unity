@@ -6,17 +6,16 @@ TagManager:
   tags:
   - Badak
   - material
-  - monster
-  - item
-  - ladder
+  - Monster
+  - Ladder
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - onDamaged
   - Water
   - UI
-  - 
+  - onLadder
   - 
   - 
   - 
