@@ -22,9 +22,8 @@ public class Wizard : MonoBehaviour
     public bool canLadder = false;
     public Vector2 ladderTop;
     public Vector2 ladderBottom;
-    public bool isAttacking = false;
-    public float jumpPower = 9f;
-    public int hp;
+    public float jumpPower = 5f;
+    public int hp = 100;
     public int stamina;
     public float atk;
     public float def;
@@ -32,17 +31,14 @@ public class Wizard : MonoBehaviour
     public enum Skill
     {
         Teleportation,
-        Attack,
         HighJump,
         PowerPush,
         SpeedUp,
-        DefenseUp,
-        RubberMan,
-        Magnet,
-        Giant,
-        NanJangI,
-        FireBall,
-        RailGun
+    }
+
+    public int getHp()
+    {
+        return hp;
     }
 
     // Start is called before the first frame update
@@ -52,7 +48,7 @@ public class Wizard : MonoBehaviour
         
         anim = GetComponent<Animator>();
         playerCollider = GetComponent<Collider2D>();
-        equippedSkill = Skill.SpeedUp;
+        equippedSkill = Skill.PowerPush;
     }
 
     // Update is called once per frame
@@ -117,7 +113,9 @@ public class Wizard : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(!isAttacking)
+        AnimatorStateInfo currentAnim = anim.GetCurrentAnimatorStateInfo(0);
+
+        if(!currentAnim.IsName("Attack"))
         {
             if(Input.GetKey(KeyCode.LeftArrow)&&!onLadder)
             {
@@ -194,9 +192,10 @@ public class Wizard : MonoBehaviour
     void onDamaged(Vector2 targetPos)
     {
         gameObject.layer = 3;
+        anim.SetBool("hurt",true);
         int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
-        rigid.AddForce(new Vector2(dirc,1)*80,ForceMode2D.Impulse);
-        Invoke("offDamaged",1f);
+        rigid.AddForce(new Vector2(dirc,1)*30,ForceMode2D.Impulse);
+        Invoke("offDamaged",0.5f);
     }
 
     void offDamaged()
@@ -228,7 +227,7 @@ public class Wizard : MonoBehaviour
         Collider2D[] enemy = Physics2D.OverlapCircleAll(transform.position,6f);
         foreach(Collider2D e in enemy)
         {
-            if(e.CompareTag("monster"))
+            if(e.CompareTag("Monster"))
             {
                 Rigidbody2D rb = e.attachedRigidbody;
                 Vector2 forceDirection = transform.localScale;
@@ -238,21 +237,12 @@ public class Wizard : MonoBehaviour
         }
     }
 
-    void Giant()
-    {
-        transform.localScale *= 2;
-    }
-
     protected void SkillSelector(Skill skill)
     {
         switch (skill)
         {
             case Skill.HighJump:
                 HighJump();
-                break;
-
-            case Skill.Attack:
-                Debug.Log("f");
                 break;
             
             case Skill.Teleportation:
@@ -266,14 +256,6 @@ public class Wizard : MonoBehaviour
             case Skill.SpeedUp:
                 SpeedUp();
                 break;
-            
-            case Skill.DefenseUp:
-                DefenseUp();
-                break;
-            
-            case Skill.RubberMan:
-                RubberMan();
-                break;
         }
     }
 
@@ -281,21 +263,6 @@ public class Wizard : MonoBehaviour
     {
         speed += 10f;
         StartCoroutine(DeactivateSpeedUp());
-    }
-
-    void DefenseUp()
-    {
-        def += 1000;
-        StartCoroutine(DeactivateDefenseUp());
-    }
-
-    void RubberMan()
-    {
-        while(isGrounded)
-        {
-            rigid.AddForce(Vector2.up,ForceMode2D.Impulse);
-        }
-        StartCoroutine(DeactivateRubberMan());
     }
 
     //attack
@@ -320,25 +287,6 @@ public class Wizard : MonoBehaviour
         speed -= 10f;
         yield return new WaitForSeconds(3f);
         Debug.Log("aa");
-    }
-
-    protected IEnumerator DeactivateDefenseUp()
-    {
-        yield return new WaitForSeconds(7f);
-        def -= 1000;
-    }
-
-    protected IEnumerator DeactivateRubberMan()
-    {
-        yield return new WaitForSeconds(7f);
-    }
-
-    void Damage()
-    {
-        float x = 3000;
-        float damaged;
-        atk = 10000;
-        damaged = atk * def / (def + x);
     }
 
     void upLadder()
