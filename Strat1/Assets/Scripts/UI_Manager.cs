@@ -2,16 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class UI_Manager : MonoBehaviour
 {
     public GameObject mainCam;
-    public Wizard wizard;
+    public GameObject wizard;
     public Slime slime;
-    public Image hp_bar;
+    public Slider slider;
     
     void Awake()
     {
+        slider = GetComponent<Slider>();
+        wizard = GameObject.Find("Wizard");
         
     }
 

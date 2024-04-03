@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+interface tktk
+{
+    public int getHP();
+}
+
 public class Slime : MonoBehaviour
 {
     public int hp = 100;
@@ -11,6 +16,7 @@ public class Slime : MonoBehaviour
     public int nextMove;
     public bool isGrounded;
     public float speed = 1f;
+    public float character_proportion = 0.4869f;
 
     
     void Awake()
@@ -24,9 +30,9 @@ public class Slime : MonoBehaviour
     {
         transform.rotation = Quaternion.identity;
         if(nextMove == -1 && isGrounded)
-            transform.localScale = new Vector2(-1,1);
+            transform.localScale = new Vector2(-1,1)*character_proportion;
         else if(nextMove == 1 && isGrounded)
-            transform.localScale = new Vector2(1,1);
+            transform.localScale = new Vector2(1,1)*character_proportion;
         transform.Translate(nextMove*0.1f,0,0);
 
 
@@ -59,5 +65,17 @@ public class Slime : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("Badak"))
             isGrounded = false;      
+    }
+
+    public void takeHit(int dmg)
+    {
+        if(hp<=0)
+            Debug.Log("die");
+        takeDamage(dmg);
+    }
+
+    public void takeDamage(int dmg)
+    {
+        hp -= dmg;
     }
 }

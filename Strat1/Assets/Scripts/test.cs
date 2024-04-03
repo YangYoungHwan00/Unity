@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
 
-public class Wizard : MonoBehaviour
+public class test : MonoBehaviour
 {
     private float speed = 10f;
     public Skill equippedSkill;
@@ -45,7 +45,6 @@ public class Wizard : MonoBehaviour
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
-        
         anim = GetComponent<Animator>();
         playerCollider = GetComponent<Collider2D>();
         equippedSkill = Skill.PowerPush;
@@ -54,7 +53,6 @@ public class Wizard : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(canLadder);
         transform.rotation = Quaternion.identity;
 
         //Attack
@@ -94,7 +92,7 @@ public class Wizard : MonoBehaviour
         if(onLadder&&Input.GetKeyDown(KeyCode.Space))
         {
             onLadder = false;
-            rigid.gravityScale = 15;
+            rigid.gravityScale = 30;
             rigid.isKinematic = false;
             rigid.AddForce(Vector2.up*jumpPower*0.7f,ForceMode2D.Impulse);
         }
@@ -292,15 +290,15 @@ public class Wizard : MonoBehaviour
 
     void upLadder()
     {
-        transform.Translate(0,0.3f,0);
+        transform.Translate(0,0.5f,0);
     }
 
     void downLadder()
     {
-        transform.Translate(0,-0.3f,0);
+        transform.Translate(0,-0.5f,0);
     }
 
-     private void OnTriggerEnter2D(Collider2D other) {
+    private void OnTriggerEnter2D(Collider2D other) {
         if(other.CompareTag("Ladder"))
         {
             
@@ -316,16 +314,16 @@ public class Wizard : MonoBehaviour
         if(onLadder)
         {
             transform.position = new Vector2(other.bounds.center.x,transform.position.y);
-            if(transform.position.y>other.bounds.max.y+3)
+            if(transform.position.y>other.bounds.max.y-transform.localScale.y/2)
             {
                 onLadder = false;
-                rigid.gravityScale = 15;
+                rigid.gravityScale = 30;
                 rigid.isKinematic = false;
             }
-            else if(transform.position.y<other.bounds.min.y)
+            else if(transform.position.y<other.transform.position.y-other.transform.localScale.y/2+transform.localScale.y)
             {
                 onLadder = false;
-                rigid.gravityScale = 15;
+                rigid.gravityScale = 30;
                 rigid.isKinematic = false;
             }
         }
@@ -336,7 +334,7 @@ public class Wizard : MonoBehaviour
         {
             canLadder = false;
             onLadder = false;
-            rigid.gravityScale = 15;
+            rigid.gravityScale = 30;
             rigid.isKinematic = false;
         }
     }
