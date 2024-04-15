@@ -25,7 +25,6 @@ public class Wizard : MonoBehaviour
     public float jumpPower = 2f;
     public float maxHp;
     public float curHp;
-    public string tt = "tt";
     public int stamina;
     public float atk;
     public float def;
