@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Wizard : MonoBehaviour
 {
@@ -22,7 +23,9 @@ public class Wizard : MonoBehaviour
     public Vector2 ladderTop;
     public Vector2 ladderBottom;
     public float jumpPower = 2f;
-    public int hp = 100;
+    public float maxHp;
+    public float curHp;
+    public string tt = "tt";
     public int stamina;
     public float atk;
     public float def;
@@ -36,27 +39,21 @@ public class Wizard : MonoBehaviour
         SpeedUp,
     }
 
-    public int getHp()
-    {
-        return hp;
-    }
-
     // Start is called before the first frame update
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
-        
         anim = GetComponent<Animator>();
         playerCollider = GetComponent<Collider2D>();
         equippedSkill = Skill.PowerPush;
+        maxHp = 100f;
+        curHp = 50f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(canLadder);
         transform.rotation = Quaternion.identity;
-
         //Attack
         if(Input.GetKeyDown(KeyCode.D))
         {
@@ -322,7 +319,7 @@ public class Wizard : MonoBehaviour
                 rigid.gravityScale = 15;
                 rigid.isKinematic = false;
             }
-            else if(transform.position.y<other.bounds.min.y)
+            else if(transform.position.y<other.bounds.min.y+transform.localScale.y/2)
             {
                 onLadder = false;
                 rigid.gravityScale = 15;
@@ -341,8 +338,4 @@ public class Wizard : MonoBehaviour
         }
     }
 
-    public int getHP()
-    {
-        return hp;
-    }
 }
