@@ -177,7 +177,7 @@ public class Wizard : MonoBehaviour
         if(collision.gameObject.CompareTag("Monster"))
         {
             if(gameObject.layer == 0)
-            onDamaged(collision.transform.position);
+            onDamaged(collision);
         }
     }
 
@@ -186,13 +186,14 @@ public class Wizard : MonoBehaviour
             isGrounded = false;
     }
 
-    void onDamaged(Vector2 targetPos)
+    void onDamaged(Collision2D collision)
     {
         gameObject.layer = 3;
         anim.SetBool("hurt",true);
-        int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
+        int dirc = transform.position.x - collision.transform.position.x > 0 ? 1 : -1;
         rigid.AddForce(new Vector2(dirc,1)*30,ForceMode2D.Impulse);
         Invoke("offDamaged",0.5f);
+        Debug.Log(collision.gameObject);
     }
 
     void offDamaged()

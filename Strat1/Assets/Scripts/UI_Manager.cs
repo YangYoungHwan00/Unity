@@ -15,11 +15,13 @@ public class UI_Manager : MonoBehaviour
     public Wizard wizard;
     public GameObject statusPanel;
     
+    
     void Awake()
     {
         wizard = GameObject.Find("Wizard").GetComponent<Wizard>();
         statusPanel = GameObject.Find("Status_Panel");
         statusPanel.SetActive(false);
+        GameObject name = GameObject.Find("name");
     }
 
     // Update is called once per frame

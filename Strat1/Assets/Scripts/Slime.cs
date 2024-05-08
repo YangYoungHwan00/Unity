@@ -40,6 +40,7 @@ public class Slime : MonoBehaviour
         Vector2 frontVec = new Vector2(transform.position.x+nextMove,transform.position.y);
         Debug.DrawRay(frontVec,Vector3.down,new Color(0,1,0));
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec,Vector3.down,1,LayerMask.GetMask("Default"));
+        
         if(rayHit.collider == null)
         {
             nextMove*= -1;
